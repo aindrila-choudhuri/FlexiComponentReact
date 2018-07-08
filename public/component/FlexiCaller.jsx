@@ -1,6 +1,7 @@
 const React = require("react");
 import Flexi from "./Flexi";
 
+//parent component of Flexi component which passes the flexiConfig object depending on which Flexi component creates the UI dynamically
 export default class FlexiCaller extends React.Component {
     constructor(props) {
         super(props);

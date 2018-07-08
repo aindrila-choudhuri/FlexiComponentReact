@@ -1,5 +1,6 @@
 const React = require("react");
 
+//Flexi component which takes the config object from the parent component and depending on that it creates the dynamic UI
 export default class Flexi extends React.Component {
   constructor(props) {
     super(props);
