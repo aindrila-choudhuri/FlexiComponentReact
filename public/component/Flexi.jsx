@@ -5,11 +5,11 @@ export default class Flexi extends React.Component {
     super(props);
     this.state = {};
 
-    this.handleChangeTextBox = this.handleChangeTextBox.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChangeTextBox(key, event) {
+  handleChange(key, event) {
     this.setState({ [key]: event.target.value });
   }
 
@@ -36,7 +36,7 @@ export default class Flexi extends React.Component {
           type="text"
           ref={item.name}
           style={inputStyle}
-          onChange={(textBoxValue) => this.handleChangeTextBox(item.name, textBoxValue)} />
+          onChange={(textBoxValue) => this.handleChange(item.name, textBoxValue)} />
       </div>;
       result.push(element);
     }
@@ -53,7 +53,7 @@ export default class Flexi extends React.Component {
       element = <div style={sectionStyle} key={item.name+idx}>{item.label}:
       <select
           ref={item.name}
-          onChange={(dropDownValue) => this.handleChangeTextBox(item.name, dropDownValue)}>
+          onChange={(dropDownValue) => this.handleChange(item.name, dropDownValue)}>
             <option value="">
               Select state
             </option>
