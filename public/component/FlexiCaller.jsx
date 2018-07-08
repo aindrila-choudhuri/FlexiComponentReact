@@ -42,10 +42,13 @@ export default class FlexiCaller extends React.Component {
         this.onFlexiSubmit = this.onFlexiSubmit.bind(this);
     }
 
+    //This method is called on sumission of the child Flexi component
+    //It takes one parameter - value(object containing the user input values)
     onFlexiSubmit(value) {
         console.log("User input values from Flexi component", value);
     }
 
+    //The component render method
     render() {
         return (
             <Flexi onSubmit={this.onFlexiSubmit} config={this.flexiConfig} />
