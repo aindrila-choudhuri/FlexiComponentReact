@@ -20026,6 +20026,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -20042,72 +20044,118 @@ var Flexi = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (Flexi.__proto__ || Object.getPrototypeOf(Flexi)).call(this, props));
 
-    _this.state = {
-      personName: '',
-      stateName: ''
-    };
+    _this.state = {};
 
     _this.handleChangeTextBox = _this.handleChangeTextBox.bind(_this);
-    _this.handleChangeDropdown = _this.handleChangeDropdown.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
     return _this;
   }
 
   _createClass(Flexi, [{
-    key: 'handleChangeTextBox',
-    value: function handleChangeTextBox(event) {
-      this.setState({ personName: event.target.value });
+    key: "handleChangeTextBox",
+    value: function handleChangeTextBox(key, event) {
+      this.setState(_defineProperty({}, key, event.target.value));
     }
   }, {
-    key: 'handleChangeDropdown',
-    value: function handleChangeDropdown(event) {
-      this.setState({ stateName: event.target.value });
-    }
-  }, {
-    key: 'handleSubmit',
+    key: "handleSubmit",
     value: function handleSubmit(event) {
       this.props.onSubmit(this.state);
       event.preventDefault();
     }
   }, {
-    key: 'render',
-    value: function render() {
+    key: "buildComponent",
+    value: function buildComponent(config) {
       var _this2 = this;
 
-      var elements = this.props.config.items.map(function (item, idx) {
-        return item.type === "TextField" ? React.createElement(
-          'div',
-          { key: idx, style: sectionStyle },
-          item.label,
-          ': ',
-          React.createElement('input', { type: 'text', style: inputStyle, value: _this2.state.personName, onChange: _this2.handleChangeTextBox })
-        ) : item.type === "Dropdown" ? React.createElement(
-          'div',
-          { key: idx, style: sectionStyle },
-          item.label,
-          ': ',
-          React.createElement(
-            'select',
-            { value: _this2.state.stateName, onChange: _this2.handleChangeDropdown },
-            item.values.map(function (val, index) {
-              return React.createElement(
-                'option',
-                { key: index, value: val },
-                val
-              );
-            })
-          )
-        ) : null;
+      var result = [];
+
+      config.items.forEach(function (item, index) {
+        result = result.concat(_this2.buildChildComponent(item, index));
       });
 
+      return result;
+    }
+  }, {
+    key: "buildChildComponent",
+    value: function buildChildComponent(item, idx) {
+      var _this3 = this;
+
+      var result = [];
+      var element = '';
+      if (item.type === "TextField") {
+        element = React.createElement(
+          "div",
+          { key: item.name + idx, style: sectionStyle },
+          item.label,
+          ":",
+          React.createElement("input", {
+            type: "text",
+            ref: item.name,
+            style: inputStyle,
+            onChange: function onChange(textBoxValue) {
+              return _this3.handleChangeTextBox(item.name, textBoxValue);
+            } })
+        );
+        result.push(element);
+      }
+      if (item.type === "Dropdown") {
+        var makeDropDown = function makeDropDown() {
+          return item.values.map(function (val, index) {
+            return React.createElement(
+              "option",
+              { key: index, value: val },
+              val
+            );
+          });
+        };
+        element = React.createElement(
+          "div",
+          { style: sectionStyle, key: item.name + idx },
+          item.label,
+          ":",
+          React.createElement(
+            "select",
+            {
+              ref: item.name,
+              onChange: function onChange(dropDownValue) {
+                return _this3.handleChangeTextBox(item.name, dropDownValue);
+              } },
+            React.createElement(
+              "option",
+              { value: "" },
+              "Select state"
+            ),
+            makeDropDown()
+          )
+        );
+        result.push(element);
+      };
+
+      if (item.subitems && item.subitems.length) {
+        item.subitems.forEach(function (subitem, index) {
+          result = result.concat(_this3.buildChildComponent(subitem, index));
+        });
+      }
+
+      return result;
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var elements = this.buildComponent(this.props.config);
+
       return React.createElement(
-        'form',
-        { onSubmit: this.handleSubmit, style: sectionStyle },
+        "div",
+        { style: sectionStyle },
         elements,
         React.createElement(
-          'div',
+          "div",
           { style: buttonStyle },
-          React.createElement('input', { type: 'submit', value: 'Submit' })
+          React.createElement(
+            "button",
+            { onClick: this.handleSubmit },
+            "Submit"
+          )
         )
       );
     }
@@ -20183,7 +20231,17 @@ var FlexiCaller = function (_React$Component) {
             items: [{
                 name: "person_name",
                 label: "Person's name",
-                type: "TextField"
+                type: "TextField",
+                subitems: [{
+                    name: "person_name_firstChild",
+                    label: "First child's name",
+                    type: "TextField",
+                    subitems: [{
+                        name: "person_name_secondChild",
+                        label: "Second child's name",
+                        type: "TextField"
+                    }]
+                }]
             }, {
                 name: "states",
                 label: "Person's state",
@@ -20199,7 +20257,7 @@ var FlexiCaller = function (_React$Component) {
     _createClass(FlexiCaller, [{
         key: "onFlexiSubmit",
         value: function onFlexiSubmit(value) {
-            console.log("inside on flexi submit", value);
+            console.log("User input values from Flexi component", value);
         }
     }, {
         key: "render",
@@ -20222,7 +20280,7 @@ exports.default = FlexiCaller;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! E:\React-Apps\ReactHello/public/app.jsx */"./public/app.jsx");
+module.exports = __webpack_require__(/*! E:\React-Apps\FlexiComponentReact/public/app.jsx */"./public/app.jsx");
 
 
 /***/ })

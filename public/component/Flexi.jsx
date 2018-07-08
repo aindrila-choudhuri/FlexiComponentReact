@@ -3,22 +3,14 @@ const React = require("react");
 export default class Flexi extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      personName: '',
-      stateName: ''
-    };
+    this.state = {};
 
     this.handleChangeTextBox = this.handleChangeTextBox.bind(this);
-    this.handleChangeDropdown = this.handleChangeDropdown.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChangeTextBox(event) {
-    this.setState({ personName: event.target.value });
-  }
-
-  handleChangeDropdown(event) {
-    this.setState({ stateName: event.target.value });
+  handleChangeTextBox(key, event) {
+    this.setState({ [key]: event.target.value });
   }
 
   handleSubmit(event) {
@@ -26,30 +18,73 @@ export default class Flexi extends React.Component {
     event.preventDefault();
   }
 
+  buildComponent(config) {
+    let result = [];
+
+    config.items.forEach((item, index) => {
+      result = result.concat(this.buildChildComponent(item, index));
+    })
+
+    return result;
+  }
+  buildChildComponent(item, idx) {
+    let result = []
+    let element = ''
+    if (item.type === "TextField") {
+      element = <div key={item.name+idx} style={sectionStyle}>{item.label}:
+      <input 
+          type="text"
+          ref={item.name}
+          style={inputStyle}
+          onChange={(textBoxValue) => this.handleChangeTextBox(item.name, textBoxValue)} />
+      </div>;
+      result.push(element);
+    }
+    if (item.type === "Dropdown") {
+      const makeDropDown = () => {
+        return item.values.map((val, index) => {
+          return (
+            <option key={index} value={val}>
+              {val}
+            </option>
+          );
+        });
+      };
+      element = <div style={sectionStyle} key={item.name+idx}>{item.label}:
+      <select
+          ref={item.name}
+          onChange={(dropDownValue) => this.handleChangeTextBox(item.name, dropDownValue)}>
+            <option value="">
+              Select state
+            </option>
+            {makeDropDown()}
+        </select>
+      </div>;
+      result.push(element);
+      };
+    
+    if (item.subitems && item.subitems.length) {
+      item.subitems.forEach((subitem, index) => {
+        result = result.concat(this.buildChildComponent(subitem, index));
+      })
+    }
+
+    return result;
+  }
+
   render() {
-    const elements = this.props.config.items.map((item, idx) => {
-      return (item.type === "TextField") ?
-        <div key= {idx} style={sectionStyle}>{item.label}: <input type="text" style = {inputStyle} value={this.state.personName} onChange={this.handleChangeTextBox} /></div>
-        : (item.type === "Dropdown") ?
-        <div key= {idx} style={sectionStyle}>{item.label}: <select value={this.state.stateName} onChange={this.handleChangeDropdown}>
-            {
-              item.values.map((val, index) =>
-                <option key= {index} value={val}>{val}</option>
-              )
-            }
-          </select></div>
-          : null;
-    });
+    const elements = this.buildComponent(this.props.config);
 
     return (
-      <form onSubmit={this.handleSubmit} style={sectionStyle}>
-        
+      <div style={sectionStyle}>
         {elements}
-        
         <div style={buttonStyle}>
-          <input type="submit" value="Submit" />
+          <button onClick={this.handleSubmit}>
+            Submit
+        </button>
+
         </div>
-      </form>
+      </div>
     );
   }
 }
@@ -67,7 +102,7 @@ const buttonStyle = {
   marginRight: 38
 }
 
-const inputStyle = {  
+const inputStyle = {
   textAlign: 'left',
   fontSize: 15,
   fontWeight: 'normal',
