@@ -9,15 +9,21 @@ export default class Flexi extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  //This method handles the on change event for the input elements
+  //It takes two parameters - Key(the element name which is to be set in the state), event (event object) 
   handleChange(key, event) {
     this.setState({ [key]: event.target.value });
   }
 
+  //This method handles the on click event of the Submit button
+  //It takes one parameter - event(the event object)
   handleSubmit(event) {
     this.props.onSubmit(this.state);
     event.preventDefault();
   }
 
+  //This method builds the elements in the component based on the config passed in props
+  //It takes one parameter - config(the config object)
   buildComponent(config) {
     let result = [];
 
@@ -27,6 +33,9 @@ export default class Flexi extends React.Component {
 
     return result;
   }
+
+  //This method is recursively called in case of recursive structure in the config object
+  //It takes two parameters - item(the object for which the recursive structure to be made) idx(array index)
   buildChildComponent(item, idx) {
     let result = []
     let element = ''
@@ -72,6 +81,7 @@ export default class Flexi extends React.Component {
     return result;
   }
 
+  //The component render method
   render() {
     const elements = this.buildComponent(this.props.config);
 
